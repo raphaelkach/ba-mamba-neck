@@ -1,0 +1,15 @@
+torch>=2.1.0
+torchvision
+mmengine
+mmcv>=2.0.0
+mmdet>=3.0.0
+pycocotools
+sahi
+scipy
+scikit-posthocs
+matplotlib
+seaborn
+wandb
+fvcore
+mamba-ssm>=2.0.0
+causal-conv1d>=1.2.0

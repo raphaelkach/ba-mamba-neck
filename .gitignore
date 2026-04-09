@@ -1,0 +1,6 @@
+checkpoints/
+data/visdrone*/
+wandb/
+__pycache__/
+*.pyc
+*.pth
