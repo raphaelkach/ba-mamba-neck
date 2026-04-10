@@ -11,6 +11,15 @@ Backbone (ResNet-50, frozen) und Head (FCOS+ATSS) sind in allen drei
 Varianten identisch — einzige unabhängige Variable ist das Neck
 (Ceteris-Paribus-Design).
 
+## Notebooks (Colab)
+
+| # | Notebook | Beschreibung | |
+|---|---|---|---|
+| 1 | `01_data.ipynb` | Datenvorbereitung (Download, COCO-Konvertierung, SAHI-Slicing) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/raphaelkach/ba-mamba-neck/blob/main/notebooks/01_data.ipynb) |
+| 2 | `02_train.ipynb` | Training (3x ausfuehren: fpn, aifi, mamba) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/raphaelkach/ba-mamba-neck/blob/main/notebooks/02_train.ipynb) |
+| 3 | `03_eval.ipynb` | Evaluation + Figures (Metriken, Statistik, Scaling, Qualitativ) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/raphaelkach/ba-mamba-neck/blob/main/notebooks/03_eval.ipynb) |
+| 4 | `04_erf.ipynb` | ERF-Analyse (Effective Receptive Field, 3 Necks x 3 Levels) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/raphaelkach/ba-mamba-neck/blob/main/notebooks/04_erf.ipynb) |
+
 ## Setup (Google Colab A100)
 
 ```bash
