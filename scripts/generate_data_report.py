@@ -1,0 +1,271 @@
+"""Generate ``docs/data_report.md`` from VisDrone COCO JSONs.
+
+Reads the ``summary.json`` produced by ``data/prepare.py`` plus the
+four COCO-annotation files (train/val, unsliced/sliced) and writes a
+Markdown report used in chapter 4 of the BA. Also renders three sample
+validation images with ground-truth boxes to ``docs/figures/``.
+
+Usage:
+    PYTHONPATH=. python scripts/generate_data_report.py \
+        --visdrone /content/visdrone \
+        --docs docs
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import random
+from collections import defaultdict
+from pathlib import Path
+from typing import Dict, List, Tuple
+
+
+def _load(p: Path) -> dict:
+    with p.open() as f:
+        return json.load(f)
+
+
+def _size_bucket_from_bbox(bbox: List[float]) -> str:
+    area = bbox[2] * bbox[3]
+    if area < 32 * 32:
+        return 'small'
+    if area < 96 * 96:
+        return 'medium'
+    return 'large'
+
+
+def _ascii_bar(count: int, max_count: int, width: int = 40) -> str:
+    if max_count <= 0:
+        return ''
+    return '#' * max(1, int(round(width * count / max_count)))
+
+
+def _avg_objs_per_image(coco: dict) -> float:
+    if not coco['images']:
+        return 0.0
+    return len(coco['annotations']) / len(coco['images'])
+
+
+def _slicing_stats(unsliced: dict, sliced: dict) -> Dict[str, float]:
+    """Slices per original image (mean/min/max) + area-shrink ratio."""
+    # filename-prefix of a slice = original filename stem.
+    img_counts: Dict[str, int] = defaultdict(int)
+    for img in sliced['images']:
+        name = img['file_name']
+        stem = name.split('_', 1)[0] if '_' in name else Path(name).stem
+        img_counts[stem] += 1
+    counts = list(img_counts.values()) or [0]
+
+    unsliced_area = sum(a['bbox'][2] * a['bbox'][3]
+                        for a in unsliced['annotations'])
+    sliced_area = sum(a['bbox'][2] * a['bbox'][3]
+                      for a in sliced['annotations'])
+    shrink_pct = 0.0
+    if unsliced_area > 0:
+        shrink_pct = 100 * (1 - sliced_area / unsliced_area)
+
+    return dict(
+        mean=sum(counts) / len(counts),
+        min=min(counts),
+        max=max(counts),
+        shrink_pct=shrink_pct,
+    )
+
+
+def _render_samples(coco: dict, images_dir: Path,
+                    out_dir: Path, n: int = 3,
+                    seed: int = 42) -> List[Path]:
+    """Render ``n`` val images with GT boxes to ``out_dir/val_sample_*.png``."""
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.patches as patches
+    import matplotlib.pyplot as plt
+    from PIL import Image
+
+    out_dir.mkdir(parents=True, exist_ok=True)
+    ann_by_img: Dict[int, List[dict]] = defaultdict(list)
+    for a in coco['annotations']:
+        ann_by_img[a['image_id']].append(a)
+    id_to_name = {c['id']: c['name'] for c in coco['categories']}
+
+    rng = random.Random(seed)
+    sampled = rng.sample(coco['images'], k=min(n, len(coco['images'])))
+    paths: List[Path] = []
+    for i, img_info in enumerate(sampled, start=1):
+        img = Image.open(images_dir / img_info['file_name']).convert('RGB')
+        fig, ax = plt.subplots(1, 1, figsize=(10, 6))
+        ax.imshow(img)
+        for ann in ann_by_img.get(img_info['id'], []):
+            x, y, w, h = ann['bbox']
+            ax.add_patch(patches.Rectangle(
+                (x, y), w, h, linewidth=1,
+                edgecolor='lime', facecolor='none'))
+            ax.text(x, max(0, y - 2), id_to_name[ann['category_id']],
+                    color='lime', fontsize=5)
+        ax.set_title(
+            f"{img_info['file_name']} - "
+            f"{len(ann_by_img.get(img_info['id'], []))} objects"
+        )
+        ax.axis('off')
+        out = out_dir / f'val_sample_{i}.png'
+        fig.tight_layout()
+        fig.savefig(out, dpi=120, bbox_inches='tight')
+        plt.close(fig)
+        paths.append(out)
+    return paths
+
+
+# -----------------------------------------------------------------------------
+# Report generation
+# -----------------------------------------------------------------------------
+
+
+def generate(visdrone_dir: Path, docs_dir: Path) -> None:
+    ann_dir = visdrone_dir / 'annotations'
+    summary = _load(visdrone_dir / 'summary.json')
+    splits = {
+        'train_unsliced': _load(ann_dir / 'train_unsliced.json'),
+        'train_sliced':   _load(ann_dir / 'train_sliced.json'),
+        'val_unsliced':   _load(ann_dir / 'val_unsliced.json'),
+        'val_sliced':     _load(ann_dir / 'val_sliced.json'),
+    }
+
+    # Slicing stats
+    train_slice_stats = _slicing_stats(
+        splits['train_unsliced'], splits['train_sliced'])
+    val_slice_stats = _slicing_stats(
+        splits['val_unsliced'], splits['val_sliced'])
+
+    # Sample renders
+    val_images_dir = visdrone_dir / 'raw' / 'VisDrone2019-DET-val' / 'images'
+    figures_dir = docs_dir / 'figures'
+    sample_paths = _render_samples(
+        splits['val_unsliced'], val_images_dir, figures_dir)
+
+    # Build markdown ----------------------------------------------------------
+    lines: List[str] = []
+    lines += [
+        '# Data Report - VisDrone-DET 2019',
+        '',
+        '_Auto-generated by `scripts/generate_data_report.py` (P1 + P3)._',
+        '',
+        '## Pipeline',
+        '',
+        '1. Download VisDrone-DET train + val from the official Google Drive.',
+        '2. Convert TXT annotations to COCO format. Categories 0 (ignored) '
+        'and 11 (others) plus zero-score boxes are dropped; the remaining '
+        '10 classes are remapped to IDs 1..10.',
+        '3. SAHI slicing at 640x640 with 20% overlap for both splits. The '
+        'unsliced val set is kept in addition to the sliced val set so '
+        'SAHI-style inference can run at evaluation time.',
+        '',
+    ]
+
+    # Images / annotations / size buckets
+    lines += [
+        '## Images, annotations, size distribution',
+        '',
+        '| Split | #Images | #Annotations | avg obj/img | small | medium | large |',
+        '|---|---:|---:|---:|---:|---:|---:|',
+    ]
+    for split_key, short in (('train_unsliced', 'train/unsliced'),
+                             ('train_sliced',   'train/sliced'),
+                             ('val_unsliced',   'val/unsliced'),
+                             ('val_sliced',     'val/sliced')):
+        coco = splits[split_key]
+        buckets = {'small': 0, 'medium': 0, 'large': 0}
+        for a in coco['annotations']:
+            buckets[_size_bucket_from_bbox(a['bbox'])] += 1
+        total = sum(buckets.values()) or 1
+        pct = {k: 100 * v / total for k, v in buckets.items()}
+        lines.append(
+            f"| {short} | {len(coco['images'])} | {len(coco['annotations'])} "
+            f"| {_avg_objs_per_image(coco):.1f} "
+            f"| {buckets['small']} ({pct['small']:.1f}%) "
+            f"| {buckets['medium']} ({pct['medium']:.1f}%) "
+            f"| {buckets['large']} ({pct['large']:.1f}%) |"
+        )
+    lines.append('')
+
+    # Class distribution (ASCII bar chart, unsliced train)
+    lines += [
+        '## Class distribution (train/unsliced)',
+        '',
+        '```',
+    ]
+    train_cls: Dict[str, int] = defaultdict(int)
+    id_to_name = {c['id']: c['name']
+                  for c in splits['train_unsliced']['categories']}
+    for a in splits['train_unsliced']['annotations']:
+        train_cls[id_to_name[a['category_id']]] += 1
+    max_cls = max(train_cls.values()) if train_cls else 1
+    for name in id_to_name.values():
+        count = train_cls.get(name, 0)
+        lines.append(
+            f'{name:<16} {count:>7}  {_ascii_bar(count, max_cls)}'
+        )
+    lines += ['```', '']
+
+    # Slicing statistics
+    lines += [
+        '## SAHI slicing statistics',
+        '',
+        '- Tile size: 640x640',
+        '- Overlap: 20%',
+        '',
+        '| Split | slices/img (mean) | min | max | approx. annotation area shrink |',
+        '|---|---:|---:|---:|---:|',
+        f'| train | {train_slice_stats["mean"]:.2f} | {train_slice_stats["min"]} | {train_slice_stats["max"]} | {train_slice_stats["shrink_pct"]:.1f}% |',
+        f'| val   | {val_slice_stats["mean"]:.2f} | {val_slice_stats["min"]} | {val_slice_stats["max"]} | {val_slice_stats["shrink_pct"]:.1f}% |',
+        '',
+        'Annotation-area shrink is the fraction of total bbox area lost '
+        'after slicing (boxes clipped at tile edges or dropped by SAHI '
+        "'min_area_ratio=0.1').",
+        '',
+    ]
+
+    # Sample images
+    lines += ['## Example annotations (val split)', '']
+    for p in sample_paths:
+        rel = p.relative_to(docs_dir)
+        lines.append(f'![{p.stem}]({rel})')
+        lines.append('')
+
+    # Summary JSON reference
+    lines += [
+        '## Raw numbers',
+        '',
+        'The ``summary.json`` written by ``data/prepare.py`` is the '
+        'single source of truth for all figures above. Re-run the '
+        'pipeline to regenerate:',
+        '',
+        '```bash',
+        'python data/prepare.py --output /content/visdrone',
+        'python scripts/generate_data_report.py --visdrone /content/visdrone',
+        '```',
+        '',
+    ]
+
+    report_path = docs_dir / 'data_report.md'
+    report_path.write_text('\n'.join(lines))
+    print(f'wrote {report_path} ({report_path.stat().st_size} bytes)')
+    print(f'wrote {len(sample_paths)} sample images to {figures_dir}')
+
+
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--visdrone', type=Path,
+                        default=Path('/content/visdrone'))
+    parser.add_argument('--docs', type=Path,
+                        default=Path(__file__).resolve().parents[1] / 'docs')
+    return parser.parse_args()
+
+
+def main() -> None:
+    args = parse_args()
+    generate(args.visdrone, args.docs)
+
+
+if __name__ == '__main__':
+    main()
