@@ -10,7 +10,7 @@ CLASS_NAMES = [
 COCO_SMALL = 32 * 32
 COCO_MEDIUM = 96 * 96
 
-COLORS = {'fpn': '#0072B2', 'aifi': '#56B4E9', 'mamba': '#009E73'}
+COLORS = {'fpn': '#0072B2', 'aifi': '#E69F00', 'mamba': '#009E73'}
 NECK_LABELS = {'fpn': 'FPN (V1)', 'aifi': 'AIFI (V2)', 'mamba': 'Mamba (V3)'}
 
 DEFAULT_DATA_ROOT = '/content/visdrone'
