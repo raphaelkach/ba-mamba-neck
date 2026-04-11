@@ -19,7 +19,7 @@ from typing import Dict, List
 
 import numpy as np
 
-NECKS = ['fpn', 'aifi', 'mamba']
+from eval.constants import NECKS
 METRIC_COLS = ['train_loss', 'cls_loss', 'bbox_loss', 'centerness_loss',
                'val_mAP', 'val_AP_S', 'val_AP_M', 'val_AP_L', 'lr']
 

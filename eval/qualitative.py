@@ -33,22 +33,9 @@ from PIL import Image
 
 import necks as _  # noqa: F401
 
-
-NECKS = ['fpn', 'aifi', 'mamba']
-SEEDS = [42, 123, 456, 789, 1024, 2048, 3407, 4096, 5555, 7777]
-COCO_SMALL = 32 * 32
-
-# Fixed colours
-COLORS = {'fpn': '#2196F3', 'aifi': '#9C27B0', 'mamba': '#009688'}
-
-
-def _best_ckpt(ckpt_dir: Path, neck: str) -> Path:
-    for seed in SEEDS:
-        ckpts = sorted(
-            (ckpt_dir / neck / f'seed_{seed}').glob('best_*.pth'))
-        if ckpts:
-            return ckpts[0]
-    raise FileNotFoundError(f'No best ckpt for {neck}')
+from eval.constants import (COCO_SMALL, COLORS, DEFAULT_CKPT_DIR,
+                             DEFAULT_DATA_ROOT, NECKS)
+from eval.utils import get_best_checkpoint
 
 
 def _load_gt(data_root: Path) -> Dict[str, List[Dict]]:
@@ -126,7 +113,7 @@ def visualise(data_root: Path, ckpt_dir: Path,
     from mmdet.apis import init_detector, inference_detector
 
     for neck in NECKS:
-        ckpt = _best_ckpt(ckpt_dir, neck)
+        _, ckpt = get_best_checkpoint(ckpt_dir, neck)
         print(f'{neck}: {ckpt.name}')
         det = init_detector(f'configs/{neck}.py',
                             str(ckpt), device=str(device))
@@ -153,9 +140,9 @@ def visualise(data_root: Path, ckpt_dir: Path,
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--data-root', type=Path,
-                    default=Path('/content/visdrone'))
+                    default=Path(DEFAULT_DATA_ROOT))
     ap.add_argument('--ckpt-dir', type=Path,
-                    default=Path('/content/drive/MyDrive/ba'))
+                    default=Path(DEFAULT_CKPT_DIR))
     ap.add_argument('--results', type=Path, default=Path('results'))
     ap.add_argument('--conf-thr', type=float, default=0.3)
     args = ap.parse_args()

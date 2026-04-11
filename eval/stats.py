@@ -29,12 +29,12 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import sciposthocs as sp
 from scipy import stats
 
+from eval.constants import NECKS, SEEDS
 
-NECKS = ['fpn', 'aifi', 'mamba']
-SEEDS = [42, 123, 456, 789, 1024, 2048, 3407, 4096, 5555, 7777]
 TEST_METRICS = ['mAP', 'mAP_50', 'mAP_75', 'AP_S', 'AP_M', 'AP_L', 'AR_S']
 
 
@@ -75,8 +75,6 @@ def _rank_biserial_r(x: np.ndarray, y: np.ndarray) -> float:
 def _cd_diagram(data: Dict[str, np.ndarray], metric: str,
                 out_path: Path) -> None:
     """Produce a critical difference diagram via scikit-posthocs."""
-    # Build a wide-form DataFrame-like structure
-    import pandas as pd
     records = []
     for neck, vals in data.items():
         for i, v in enumerate(vals):
@@ -132,7 +130,6 @@ def run_stats(results_dir: Path) -> None:
     # -- Nemenyi --------------------------------------------------
     nemenyi_rows: List[Dict] = []
     for m in sig_metrics:
-        import pandas as pd
         vals = pd.DataFrame({n: data[m][n] for n in NECKS})
         pvals = sp.posthoc_nemenyi_friedman(vals)
         pairs = [('fpn', 'aifi'), ('fpn', 'mamba'), ('aifi', 'mamba')]

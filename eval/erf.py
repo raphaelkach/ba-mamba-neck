@@ -26,9 +26,8 @@ from __future__ import annotations
 
 import argparse
 import csv
-import json
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 import matplotlib
 matplotlib.use('Agg')
@@ -39,25 +38,11 @@ import torch.nn as nn
 
 import necks as _  # noqa: F401
 
+from eval.constants import DEFAULT_CKPT_DIR, DEFAULT_DATA_ROOT, NECKS
+from eval.utils import get_best_checkpoint
 
-NECKS = ['fpn', 'aifi', 'mamba']
 LEVELS = ['P3', 'P4', 'P5']
 LEVEL_IDX = {'P3': 0, 'P4': 1, 'P5': 2}
-SEEDS = [42, 123, 456, 789, 1024, 2048, 3407, 4096, 5555, 7777]
-
-
-def _best_seed(ckpt_dir: Path, neck: str) -> Tuple[int, Path]:
-    """Find the seed with the highest mAP (from run_meta or filename)."""
-    best_seed, best_path = SEEDS[0], None
-    for seed in SEEDS:
-        ckpts = sorted((ckpt_dir / neck / f'seed_{seed}').glob('best_*.pth'))
-        if ckpts:
-            best_seed, best_path = seed, ckpts[0]
-            break  # take the first available seed
-    if best_path is None:
-        raise FileNotFoundError(
-            f'No best checkpoint found for {neck} in {ckpt_dir / neck}')
-    return best_seed, best_path
 
 
 def _build_detector(cfg_path: str, ckpt: str, device: torch.device):
@@ -184,7 +169,7 @@ def analyse_erf(data_root: Path, ckpt_dir: Path,
     quant_rows: List[Dict] = []
 
     for neck in NECKS:
-        seed, ckpt_path = _best_seed(ckpt_dir, neck)
+        seed, ckpt_path = get_best_checkpoint(ckpt_dir, neck)
         print(f'\n=== {neck} (seed={seed}, ckpt={ckpt_path.name}) ===')
         det = _build_detector(f'configs/{neck}.py',
                               str(ckpt_path), device)
@@ -221,9 +206,9 @@ def analyse_erf(data_root: Path, ckpt_dir: Path,
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--data-root', type=Path,
-                    default=Path('/content/visdrone'))
+                    default=Path(DEFAULT_DATA_ROOT))
     ap.add_argument('--ckpt-dir', type=Path,
-                    default=Path('/content/drive/MyDrive/ba'))
+                    default=Path(DEFAULT_CKPT_DIR))
     ap.add_argument('--results', type=Path, default=Path('results'))
     ap.add_argument('--n-images', type=int, default=500)
     args = ap.parse_args()

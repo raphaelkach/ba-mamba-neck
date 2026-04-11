@@ -63,22 +63,9 @@ NECK_CFGS: Dict[str, dict] = {
 }
 
 
-def _build_neck(name: str, cfg: dict, device: torch.device) -> torch.nn.Module:
-    """Build a neck via MODELS.build (FPN falls back to a direct import)."""
-    try:
-        neck = MODELS.build(cfg)
-    except Exception as e:
-        if name == 'fpn':
-            try:
-                from mmdet.models.necks import FPN
-            except ImportError:
-                raise RuntimeError(
-                    'mmdet not installed - cannot build FPN. Install '
-                    'mmdet>=3.0 or run this script on Colab.'
-                ) from e
-            neck = FPN(**{k: v for k, v in cfg.items() if k != 'type'})
-        else:
-            raise
+def _build_neck(cfg: dict, device: torch.device) -> torch.nn.Module:
+    """Build a neck via MODELS.build."""
+    neck = MODELS.build(cfg)
     return neck.to(device).eval()
 
 
@@ -113,7 +100,7 @@ def main() -> int:
     param_counts: Dict[str, int] = {}
 
     for name, cfg in NECK_CFGS.items():
-        neck = _build_neck(name, cfg, device)
+        neck = _build_neck(cfg, device)
         with torch.no_grad():
             outs = neck(inputs)
         assert isinstance(outs, tuple), (

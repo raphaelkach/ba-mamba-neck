@@ -58,8 +58,8 @@ VISDRONE_CLASSES: List[str] = [
 ]
 
 #: COCO area thresholds for size buckets (pixels^2).
-COCO_SMALL_MAX = 32 * 32
-COCO_MEDIUM_MAX = 96 * 96
+COCO_SMALL = 32 * 32
+COCO_MEDIUM = 96 * 96
 
 #: SAHI slicing parameters (shared with training config).
 SLICE_SIZE = 640
@@ -264,9 +264,9 @@ def size_buckets(coco_dict: Dict) -> Dict[str, int]:
     buckets = {"small": 0, "medium": 0, "large": 0}
     for ann in coco_dict["annotations"]:
         area = ann.get("area") or (ann["bbox"][2] * ann["bbox"][3])
-        if area < COCO_SMALL_MAX:
+        if area < COCO_SMALL:
             buckets["small"] += 1
-        elif area < COCO_MEDIUM_MAX:
+        elif area < COCO_MEDIUM:
             buckets["medium"] += 1
         else:
             buckets["large"] += 1

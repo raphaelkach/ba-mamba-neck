@@ -23,27 +23,16 @@ import argparse
 import csv
 import json
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 import numpy as np
 import torch
 
 import necks as _  # noqa: F401
 
-
-NECKS = ['fpn', 'aifi', 'mamba']
-SEEDS = [42, 123, 456, 789, 1024, 2048, 3407, 4096, 5555, 7777]
-COCO_SMALL = 32 * 32
-COCO_MEDIUM = 96 * 96
-
-
-def _best_ckpt(ckpt_dir: Path, neck: str) -> Path:
-    for seed in SEEDS:
-        ckpts = sorted(
-            (ckpt_dir / neck / f'seed_{seed}').glob('best_*.pth'))
-        if ckpts:
-            return ckpts[0]
-    raise FileNotFoundError(f'No best ckpt for {neck}')
+from eval.constants import (COCO_MEDIUM, COCO_SMALL, DEFAULT_CKPT_DIR,
+                             DEFAULT_DATA_ROOT, NECKS)
+from eval.utils import get_best_checkpoint
 
 
 def _load_val_coco(data_root: Path) -> dict:
@@ -111,7 +100,7 @@ def evaluate(data_root: Path, ckpt_dir: Path,
     per_neck: Dict[str, List[Dict]] = {}
 
     for neck in NECKS:
-        ckpt = _best_ckpt(ckpt_dir, neck)
+        _, ckpt = get_best_checkpoint(ckpt_dir, neck)
         print(f'{neck}: {ckpt}')
         inf = _run_inference(f'configs/{neck}.py', str(ckpt),
                              data_root, device)
@@ -169,9 +158,9 @@ def evaluate(data_root: Path, ckpt_dir: Path,
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--data-root', type=Path,
-                    default=Path('/content/visdrone'))
+                    default=Path(DEFAULT_DATA_ROOT))
     ap.add_argument('--ckpt-dir', type=Path,
-                    default=Path('/content/drive/MyDrive/ba'))
+                    default=Path(DEFAULT_CKPT_DIR))
     ap.add_argument('--results', type=Path, default=Path('results'))
     args = ap.parse_args()
     evaluate(args.data_root, args.ckpt_dir, args.results)

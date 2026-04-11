@@ -22,14 +22,7 @@ from typing import Dict, List
 
 import numpy as np
 
-
-NECKS = ['fpn', 'aifi', 'mamba']
-SEEDS = [42, 123, 456, 789, 1024, 2048, 3407, 4096, 5555, 7777]
-
-CLASS_NAMES = [
-    'pedestrian', 'people', 'bicycle', 'car', 'van',
-    'truck', 'tricycle', 'awning-tricycle', 'bus', 'motor',
-]
+from eval.constants import CLASS_NAMES, NECKS, SEEDS
 
 METRIC_COLS = [
     'mAP', 'mAP_50', 'mAP_75', 'AP_S', 'AP_M', 'AP_L',
