@@ -145,6 +145,7 @@ def run_stats(results_dir: Path) -> None:
     # -- Wilcoxon -------------------------------------------------
     wilcoxon_rows: List[Dict] = []
     pairs = [('fpn', 'aifi'), ('fpn', 'mamba'), ('aifi', 'mamba')]
+    n_pairs = len(pairs)
     for m in TEST_METRICS:
         for a, b in pairs:
             x, y = data[m][a], data[m][b]
@@ -155,12 +156,15 @@ def run_stats(results_dir: Path) -> None:
                 r = _rank_biserial_r(x, y)
             except ValueError:
                 stat_val, p, r = 0, 1.0, 0.0
+            p_bonf = min(float(p) * n_pairs, 1.0)
             wilcoxon_rows.append({
                 'metric': m, 'pair': f'{a}_vs_{b}',
                 'stat': round(float(stat_val), 4),
                 'p': round(float(p), 6),
+                'p_bonferroni': round(p_bonf, 6),
                 'r_effect_size': round(r, 4),
                 'significant': p < 0.05,
+                'significant_bonferroni': p_bonf < 0.05,
             })
     _write_csv(results_dir / 'wilcoxon.csv', wilcoxon_rows)
 
