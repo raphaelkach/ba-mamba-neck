@@ -50,9 +50,7 @@ DUMMY_FEATURE_SHAPES = [
 DUMMY_IMAGE_SHAPE = (1, 3, 640, 640)
 
 
-# -----------------------------------------------------------------------------
 # Helpers
-# -----------------------------------------------------------------------------
 
 
 def _param_split(model: nn.Module) -> Tuple[int, int, int, int, int]:
@@ -118,7 +116,7 @@ def _latency_and_memory(neck: nn.Module,
         latency_ms = start.elapsed_time(end) / 100.0
         peak_mb = torch.cuda.max_memory_allocated() / (1024 ** 2)
         return latency_ms, peak_mb
-    # CPU fallback
+        # CPU fallback
     for _ in range(5):
         _ = neck(feats)
     t0 = time.perf_counter()
@@ -134,9 +132,7 @@ def _build_detector(cfg_path: str, device: torch.device):
     return init_detector(cfg_path, device=str(device))
 
 
-# -----------------------------------------------------------------------------
 # Markdown sections
-# -----------------------------------------------------------------------------
 
 
 def _section_param_split(detectors: Dict[str, nn.Module]) -> List[str]:
@@ -324,9 +320,7 @@ def _section_compute(detectors: Dict[str, nn.Module],
     return lines
 
 
-# -----------------------------------------------------------------------------
 # Orchestration
-# -----------------------------------------------------------------------------
 
 
 def generate(docs_dir: Path) -> None:

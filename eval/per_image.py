@@ -140,7 +140,7 @@ def evaluate(data_root: Path, ckpt_dir: Path,
             w.writerows(rows)
         print(f'  -> {out} ({len(rows)} images)')
 
-    # ── Mamba vs FPN divergence ──────────────────────────────────
+    # -- Mamba vs FPN divergence ----------------------------------
     if 'fpn' in per_neck and 'mamba' in per_neck:
         fpn_dets = {r['file_name']: r['n_dets'] for r in per_neck['fpn']}
         mamba_dets = {r['file_name']: r['n_dets'] for r in per_neck['mamba']}

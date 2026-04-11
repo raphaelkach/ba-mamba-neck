@@ -116,9 +116,7 @@ def _render_samples(coco: dict, images_dir: Path,
     return paths
 
 
-# -----------------------------------------------------------------------------
 # Report generation
-# -----------------------------------------------------------------------------
 
 
 def generate(visdrone_dir: Path, docs_dir: Path) -> None:

@@ -9,9 +9,7 @@ Standard-Pipeline (Resize+Flip) ist in Lin et al. 2017 (FPN)
 und Tan et al. 2020 (EfficientDet) etabliert.
 """
 
-# -----------------------------------------------------------------------------
 # Paths & metadata
-# -----------------------------------------------------------------------------
 dataset_type = 'CocoDataset'
 data_root = '/content/visdrone/'
 
@@ -26,9 +24,7 @@ metainfo = dict(
 backend_args = None
 image_scale = (640, 640)
 
-# -----------------------------------------------------------------------------
 # Pipelines
-# -----------------------------------------------------------------------------
 train_pipeline = [
     dict(type='LoadImageFromFile', backend_args=backend_args),
     dict(type='LoadAnnotations', with_bbox=True),
@@ -48,9 +44,7 @@ test_pipeline = [
     ),
 ]
 
-# -----------------------------------------------------------------------------
 # Dataloaders
-# -----------------------------------------------------------------------------
 train_dataloader = dict(
     batch_size=8,
     num_workers=4,
@@ -88,9 +82,7 @@ val_dataloader = dict(
 )
 test_dataloader = val_dataloader
 
-# -----------------------------------------------------------------------------
 # Evaluators
-# -----------------------------------------------------------------------------
 val_evaluator = dict(
     type='CocoMetric',
     ann_file=data_root + 'annotations/val_unsliced.json',

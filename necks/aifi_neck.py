@@ -39,9 +39,7 @@ except ImportError:  # pragma: no cover - local config-parse only
     from mmengine.registry import MODELS
 
 
-# -----------------------------------------------------------------------------
 # Building blocks
-# -----------------------------------------------------------------------------
 
 def _conv_bn_act(in_ch: int, out_ch: int, k: int, s: int = 1,
                  p: int | None = None, act: bool = True) -> nn.Sequential:
@@ -153,7 +151,7 @@ class CCFMFusion(nn.Module):
 
     def forward(self, f3: torch.Tensor, f4: torch.Tensor,
                 f5: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
-        # Top-down
+                # Top-down
         f5_up = F.interpolate(f5, size=f4.shape[-2:], mode='nearest')
         f4_td = self.td_45(self.fuse_td_45(torch.cat([f5_up, f4], dim=1)))
         f4_up = F.interpolate(f4_td, size=f3.shape[-2:], mode='nearest')
@@ -166,9 +164,7 @@ class CCFMFusion(nn.Module):
         return f3_td, f4_out, f5_out
 
 
-# -----------------------------------------------------------------------------
 # MMDet neck
-# -----------------------------------------------------------------------------
 
 
 @MODELS.register_module()

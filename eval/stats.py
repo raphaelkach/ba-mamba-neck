@@ -92,7 +92,7 @@ def _cd_diagram(data: Dict[str, np.ndarray], metric: str,
         cd = sp.critical_difference_diagram(
             pivot, ax=ax)
     except Exception:
-        # Fallback: simple bar plot of average ranks
+    # Fallback: simple bar plot of average ranks
         avg_ranks = pivot.rank(axis=1, ascending=False).mean()
         ax.barh(range(k), avg_ranks[NECKS], color=['#2196F3', '#9C27B0', '#009688'])
         ax.set_yticks(range(k))
@@ -110,7 +110,7 @@ def run_stats(results_dir: Path) -> None:
     fig_dir = results_dir / 'figures'
     fig_dir.mkdir(parents=True, exist_ok=True)
 
-    # ── Friedman ─────────────────────────────────────────────────
+    # -- Friedman -------------------------------------------------
     friedman_rows: List[Dict] = []
     sig_metrics: List[str] = []
     for m in TEST_METRICS:
@@ -129,7 +129,7 @@ def run_stats(results_dir: Path) -> None:
             sig_metrics.append(m)
     _write_csv(results_dir / 'friedman.csv', friedman_rows)
 
-    # ── Nemenyi ──────────────────────────────────────────────────
+    # -- Nemenyi --------------------------------------------------
     nemenyi_rows: List[Dict] = []
     for m in sig_metrics:
         import pandas as pd
@@ -145,7 +145,7 @@ def run_stats(results_dir: Path) -> None:
             })
     _write_csv(results_dir / 'nemenyi.csv', nemenyi_rows)
 
-    # ── Wilcoxon ─────────────────────────────────────────────────
+    # -- Wilcoxon -------------------------------------------------
     wilcoxon_rows: List[Dict] = []
     pairs = [('fpn', 'aifi'), ('fpn', 'mamba'), ('aifi', 'mamba')]
     for m in TEST_METRICS:
@@ -167,7 +167,7 @@ def run_stats(results_dir: Path) -> None:
             })
     _write_csv(results_dir / 'wilcoxon.csv', wilcoxon_rows)
 
-    # ── CD diagrams ──────────────────────────────────────────────
+    # -- CD diagrams ----------------------------------------------
     for m in ['mAP', 'AP_S']:
         if m in data and all(len(data[m][n]) > 0 for n in NECKS):
             _cd_diagram(data[m], m,

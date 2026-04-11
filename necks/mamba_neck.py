@@ -56,9 +56,7 @@ if _MAMBA_AVAILABLE and not torch.cuda.is_available():
     )
 
 
-# -----------------------------------------------------------------------------
 # Selective scan - reference implementation for CPU unit tests
-# -----------------------------------------------------------------------------
 
 def _selective_scan_naive(u: torch.Tensor, delta: torch.Tensor,
                           A: torch.Tensor, B: torch.Tensor,
@@ -97,9 +95,7 @@ def _run_scan(u, delta, A, B, C, D):
     return _selective_scan_naive(u, delta, A, B, C, D)
 
 
-# -----------------------------------------------------------------------------
 # SS2D - 2D selective scan with 4-direction cross-scan
-# -----------------------------------------------------------------------------
 
 class SS2D(nn.Module):
     """Selective scan 2D with cross-scan over 4 directions (VMamba)."""
@@ -134,7 +130,7 @@ class SS2D(nn.Module):
         ])
 
     def _scan_direction(self, k: int, u: torch.Tensor) -> torch.Tensor:
-        # u: (Bsz, d_inner, L)
+    # u: (Bsz, d_inner, L)
         dblproj = self.x_proj[k](u.transpose(1, 2))        # (B, L, dt+2n)
         dt, B_raw, C_raw = torch.split(
             dblproj,
@@ -175,9 +171,7 @@ class SS2D(nn.Module):
         return y.view(Bsz, d, H, W)
 
 
-# -----------------------------------------------------------------------------
 # VSSBlock - VMamba Fig. 2c
-# -----------------------------------------------------------------------------
 
 class VSSBlock(nn.Module):
     """Single Visual State Space block (pre-LN residual)."""
@@ -214,9 +208,7 @@ class VSSBlock(nn.Module):
         return residual + a
 
 
-# -----------------------------------------------------------------------------
 # MMDet neck
-# -----------------------------------------------------------------------------
 
 
 @MODELS.register_module()

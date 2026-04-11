@@ -131,9 +131,7 @@ def main() -> int:
         param_counts[name] = _param_count(neck)
         print(f'[{name}] shapes: {shapes_per_neck[name]}')
 
-    # -------------------------------------------------------------------------
     # Check that output shapes are identical across all three necks.
-    # -------------------------------------------------------------------------
     ref_name = next(iter(shapes_per_neck))
     ref_shapes = shapes_per_neck[ref_name]
     mismatched = [n for n, s in shapes_per_neck.items() if s != ref_shapes]
@@ -144,9 +142,7 @@ def main() -> int:
         return 1
     print(f'\nall three necks produce identical shapes: {ref_shapes}')
 
-    # -------------------------------------------------------------------------
     # Parameter-count table and spread sanity check.
-    # -------------------------------------------------------------------------
     min_count = min(param_counts.values())
     max_count = max(param_counts.values())
     spread = max_count / max(min_count, 1)

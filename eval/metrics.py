@@ -96,7 +96,7 @@ def merge(results_dir: Path) -> None:
         print('No seed CSVs found in', results_dir)
         return
 
-    # ── detection_all.csv ────────────────────────────────────────
+    # -- detection_all.csv ----------------------------------------
     all_cols = ['neck', 'seed'] + METRIC_COLS + META_COLS
     all_path = results_dir / 'detection_all.csv'
     with all_path.open('w', newline='') as f:
@@ -105,7 +105,7 @@ def merge(results_dir: Path) -> None:
         w.writerows(all_rows)
     print(f'wrote {all_path} ({len(all_rows)} rows)')
 
-    # ── detection_summary.csv ────────────────────────────────────
+    # -- detection_summary.csv ------------------------------------
     summary_rows: List[Dict] = []
     for neck in NECKS:
         subset = [r for r in all_rows if r['neck'] == neck]
@@ -130,7 +130,7 @@ def merge(results_dir: Path) -> None:
             w.writerows(summary_rows)
         print(f'wrote {sum_path}')
 
-    # ── detection_deltas.csv ─────────────────────────────────────
+    # -- detection_deltas.csv -------------------------------------
     fpn_means = {col: np.mean([float(r.get(col, 0))
                                for r in all_rows if r['neck'] == 'fpn'])
                  for col in METRIC_COLS}

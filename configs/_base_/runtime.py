@@ -13,23 +13,17 @@ custom_imports = dict(
     allow_failed_imports=False,
 )
 
-# -----------------------------------------------------------------------------
 # Reproducibility
-# -----------------------------------------------------------------------------
 randomness = dict(seed=None, deterministic=True)
 
-# -----------------------------------------------------------------------------
 # Environment
-# -----------------------------------------------------------------------------
 env_cfg = dict(
     cudnn_benchmark=False,
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0),
     dist_cfg=dict(backend='nccl'),
 )
 
-# -----------------------------------------------------------------------------
 # Hooks
-# -----------------------------------------------------------------------------
 default_hooks = dict(
     timer=dict(type='IterTimerHook'),
     logger=dict(type='LoggerHook', interval=50),
@@ -51,9 +45,7 @@ custom_hooks = [
     dict(type='EpochTimerHook', priority='LOW'),
 ]
 
-# -----------------------------------------------------------------------------
 # Logging / Visualizer (WandB)
-# -----------------------------------------------------------------------------
 log_processor = dict(type='LogProcessor', window_size=50, by_epoch=True)
 log_level = 'INFO'
 
@@ -72,9 +64,7 @@ visualizer = dict(
     name='visualizer',
 )
 
-# -----------------------------------------------------------------------------
 # Misc
-# -----------------------------------------------------------------------------
 load_from = None
 resume = False
 work_dir = './work_dirs/'

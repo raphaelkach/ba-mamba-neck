@@ -11,9 +11,7 @@ _base_ = [
     './_base_/runtime.py',
 ]
 
-# -----------------------------------------------------------------------------
 # Data preprocessor (shared image normalization for all three variants).
-# -----------------------------------------------------------------------------
 data_preprocessor = dict(
     type='DetDataPreprocessor',
     mean=[123.675, 116.28, 103.53],
@@ -22,9 +20,7 @@ data_preprocessor = dict(
     pad_size_divisor=32,
 )
 
-# -----------------------------------------------------------------------------
 # Model
-# -----------------------------------------------------------------------------
 model = dict(
     type='ATSS',
     data_preprocessor=data_preprocessor,

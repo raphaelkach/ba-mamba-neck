@@ -41,7 +41,7 @@ def merge(results_dir: Path) -> None:
         print('No convergence CSVs found')
         return
 
-    # ── convergence_all.csv ──────────────────────────────────────
+    # -- convergence_all.csv --------------------------------------
     all_cols = ['neck', 'seed', 'epoch'] + METRIC_COLS
     all_path = results_dir / 'convergence_all.csv'
     with all_path.open('w', newline='') as f:
@@ -50,7 +50,7 @@ def merge(results_dir: Path) -> None:
         w.writerows(all_rows)
     print(f'wrote {all_path} ({len(all_rows)} rows)')
 
-    # ── convergence_summary.csv ──────────────────────────────────
+    # -- convergence_summary.csv ----------------------------------
     # Group by (neck, epoch), compute mean/std per metric.
     grouped: Dict[tuple, List[Dict]] = {}
     for row in all_rows:

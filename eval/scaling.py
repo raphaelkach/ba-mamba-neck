@@ -63,11 +63,11 @@ def _measure(det, neck: nn.Module, res: int,
     img = torch.randn(1, 3, res, res, device=device)
     feats = _dummy_features(res, device)
 
-    # ── GFLOPs ───────────────────────────────────────────────────
+    # -- GFLOPs ---------------------------------------------------
     gflops_total = _flops(det, img, device)
     gflops_neck = _flops(neck, feats, device)
 
-    # ── Latency + throughput (full model) ────────────────────────
+    # -- Latency + throughput (full model) ------------------------
     with torch.no_grad():
         for _ in range(N_WARMUP):
             det(img)
@@ -82,7 +82,7 @@ def _measure(det, neck: nn.Module, res: int,
     latency_ms = start.elapsed_time(end) / N_MEASURE
     throughput = 1000.0 / latency_ms if latency_ms > 0 else 0
 
-    # ── Peak memory ──────────────────────────────────────────────
+    # -- Peak memory ----------------------------------------------
     torch.cuda.reset_peak_memory_stats()
     with torch.no_grad():
         det(img)

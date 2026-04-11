@@ -33,9 +33,7 @@ from typing import Dict, List, Tuple
 from mmengine.logging import MMLogger
 from PIL import Image
 
-# ---------------------------------------------------------------------------
 # Constants
-# ---------------------------------------------------------------------------
 
 #: VisDrone-DET Google Drive file IDs (from the official VisDrone-Dataset
 #: GitHub repo). Overridable via CLI flags.
@@ -70,9 +68,7 @@ SLICE_OVERLAP = 0.2
 logger = MMLogger.get_instance("prepare", log_level="INFO")
 
 
-# ---------------------------------------------------------------------------
-# Step 1 — Download
-# ---------------------------------------------------------------------------
+# Step 1 - Download
 
 def download_visdrone(output_dir: Path, gdrive_ids: Dict[str, str]) -> Dict[str, Path]:
     """Download VisDrone train/val zips via gdown and extract them.
@@ -115,9 +111,7 @@ def download_visdrone(output_dir: Path, gdrive_ids: Dict[str, str]) -> Dict[str,
     return split_dirs
 
 
-# ---------------------------------------------------------------------------
-# Step 2 — VisDrone TXT → COCO JSON
-# ---------------------------------------------------------------------------
+# Step 2 - VisDrone TXT → COCO JSON
 
 def visdrone_to_coco(split_dir: Path, split: str) -> Dict:
     """Convert a VisDrone split (images/ + annotations/) to a COCO dict.
@@ -206,9 +200,7 @@ def visdrone_to_coco(split_dir: Path, split: str) -> Dict:
     }
 
 
-# ---------------------------------------------------------------------------
-# Step 3 — SAHI slicing
-# ---------------------------------------------------------------------------
+# Step 3 - SAHI slicing
 
 def slice_split(
     coco_dict: Dict,
@@ -258,9 +250,7 @@ def slice_split(
     return Path(sliced_json_path), sliced_images_dir
 
 
-# ---------------------------------------------------------------------------
-# Step 4 — Statistics
-# ---------------------------------------------------------------------------
+# Step 4 - Statistics
 
 def size_buckets(coco_dict: Dict) -> Dict[str, int]:
     """Count annotations by COCO size bucket (small/medium/large).
@@ -314,9 +304,7 @@ def log_stats(label: str, coco_dict: Dict) -> Dict:
     return stats
 
 
-# ---------------------------------------------------------------------------
 # Orchestration
-# ---------------------------------------------------------------------------
 
 def prepare(output_dir: Path, gdrive_ids: Dict[str, str]) -> Dict:
     """Run the full prepare pipeline and return a stats summary dict."""
@@ -329,13 +317,13 @@ def prepare(output_dir: Path, gdrive_ids: Dict[str, str]) -> Dict:
     summary: Dict[str, Dict] = {}
 
     for split, split_dir in split_dirs.items():
-        # 2) convert
+    # 2) convert
         coco = visdrone_to_coco(split_dir, split)
         unsliced_json = annotations_dir / f"{split}_unsliced.json"
         with unsliced_json.open("w") as f:
             json.dump(coco, f)
 
-        # 4a) stats — unsliced
+        # 4a) stats - unsliced
         unsliced_stats = log_stats(f"{split}/unsliced", coco)
 
         # 3) slice (train: sliced only; val: sliced + keep unsliced)
