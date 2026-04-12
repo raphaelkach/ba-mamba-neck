@@ -139,8 +139,11 @@ class SS2D(nn.Module):
         )
         dt = self.dt_proj[k](dt).transpose(1, 2)           # (B, d_inner, L)
         dt = F.softplus(dt)
+        dt = dt.to(u.dtype)
         B_raw = B_raw.transpose(1, 2).contiguous()         # (B, d_state, L)
         C_raw = C_raw.transpose(1, 2).contiguous()
+        B_raw = B_raw.to(u.dtype)
+        C_raw = C_raw.to(u.dtype)
         A = -torch.exp(self.A_logs[k])                     # (d_inner, d_state)
         return _run_scan(u.contiguous(), dt, A, B_raw, C_raw, self.Ds[k])
 
