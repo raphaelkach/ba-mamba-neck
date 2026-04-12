@@ -18,7 +18,7 @@ randomness = dict(seed=None, deterministic=True)
 
 # Environment
 env_cfg = dict(
-    cudnn_benchmark=False,
+    cudnn_benchmark=True,
     mp_cfg=dict(mp_start_method='fork', opencv_num_threads=0),
     dist_cfg=dict(backend='nccl'),
 )
@@ -43,6 +43,12 @@ default_hooks = dict(
 # Custom hook: Trainingszeit pro Epoche loggen.
 custom_hooks = [
     dict(type='EpochTimerHook', priority='LOW'),
+    dict(
+        type='EMAHook',
+        ema_type='ExpMomentumEMA',
+        momentum=0.0002,
+        update_buffers=True,
+        priority='ABOVE_NORMAL'),
 ]
 
 # Logging / Visualizer (WandB)

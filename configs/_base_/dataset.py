@@ -28,7 +28,13 @@ image_scale = (640, 640)
 train_pipeline = [
     dict(type='LoadImageFromFile', backend_args=backend_args),
     dict(type='LoadAnnotations', with_bbox=True),
-    dict(type='Resize', scale=image_scale, keep_ratio=True),
+    dict(
+        type='RandomChoiceResize',
+        scales=[(480, 480), (512, 512), (544, 544),
+                (576, 576), (608, 608), (640, 640),
+                (672, 672), (704, 704), (736, 736),
+                (768, 768), (800, 800)],
+        keep_ratio=True),
     dict(type='RandomFlip', prob=0.5),
     dict(type='PackDetInputs'),
 ]
@@ -47,8 +53,10 @@ test_pipeline = [
 # Dataloaders
 train_dataloader = dict(
     batch_size=16,
-    num_workers=4,
+    num_workers=8,
     persistent_workers=True,
+    pin_memory=True,
+    prefetch_factor=4,
     sampler=dict(type='DefaultSampler', shuffle=True),
     batch_sampler=dict(type='AspectRatioBatchSampler'),
     dataset=dict(

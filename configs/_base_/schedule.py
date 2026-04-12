@@ -13,13 +13,14 @@ test_cfg = dict(type='TestLoop')
 
 # Optimizer
 optim_wrapper = dict(
-    type='OptimWrapper',
+    type='AmpOptimWrapper',
     optimizer=dict(
         type='AdamW',
         lr=2e-4,
         weight_decay=0.05,
     ),
     clip_grad=dict(max_norm=0.1, norm_type=2),
+    loss_scale='dynamic',
 )
 
 # LR schedule: 500 iter linear warmup -> cosine annealing over 24 epochs.
