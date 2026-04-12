@@ -51,12 +51,6 @@ log_level = 'INFO'
 
 vis_backends = [
     dict(type='LocalVisBackend'),
-    dict(
-        type='WandbVisBackend',
-        init_kwargs=dict(
-            project='ba-mamba-neck',
-        ),
-    ),
 ]
 visualizer = dict(
     type='DetLocalVisualizer',
