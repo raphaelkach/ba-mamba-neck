@@ -16,7 +16,7 @@ optim_wrapper = dict(
     type='OptimWrapper',
     optimizer=dict(
         type='AdamW',
-        lr=1e-4,
+        lr=2e-4,
         weight_decay=0.05,
     ),
     clip_grad=dict(max_norm=0.1, norm_type=2),
@@ -42,4 +42,4 @@ param_scheduler = [
     ),
 ]
 
-auto_scale_lr = dict(enable=False, base_batch_size=8)
+auto_scale_lr = dict(enable=False, base_batch_size=16)
