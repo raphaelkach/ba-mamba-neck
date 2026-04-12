@@ -49,3 +49,10 @@ Output: Tuple[Tensor] - 5 feature maps {P3, P4, P5, P6, P7} for ATSSHead
 - Type hints, Google-style docstrings
 - Configs in MMDetection Python style (not YAML)
 - Logging via mmengine.logging
+
+## Notebook-Sync
+The files 02_train_fpn.ipynb, 02_train_aifi.ipynb and
+02_train_mamba.ipynb are identical copies of 02_train.ipynb.
+Only difference: cell 3 sets NECK to the respective value.
+RULE: Any change to one of the four files MUST be applied to
+all four files simultaneously. No exceptions.
