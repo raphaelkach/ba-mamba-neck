@@ -1,7 +1,10 @@
 """Optimizer + LR-Schedule (geteilt zwischen V1/V2/V3).
 
-24 Epochen, AdamW, CosineAnnealingLR mit 500-iter Linear-Warmup,
-grad_clip max_norm=0.1. Ceteris-paribus fuer alle drei Necks.
+24 Epochen, AdamW (AMP bfloat16), CosineAnnealingLR mit 500-iter
+Linear-Warmup, grad_clip max_norm=0.1. bfloat16 statt float16 weil
+exp() in float16 (5-bit Exponent) ab Epoch 5-6 overflowed und NaN
+verursacht. bfloat16 hat 8-bit Exponent wie float32 und braucht
+kein Loss-Scaling. Ceteris-paribus fuer alle drei Necks.
 """
 
 # Training loop
@@ -20,7 +23,7 @@ optim_wrapper = dict(
         weight_decay=0.05,
     ),
     clip_grad=dict(max_norm=0.1, norm_type=2),
-    loss_scale='dynamic',
+    dtype='bfloat16',
 )
 
 # LR schedule: 500 iter linear warmup -> cosine annealing over 24 epochs.
