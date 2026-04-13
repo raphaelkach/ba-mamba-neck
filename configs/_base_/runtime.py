@@ -9,7 +9,7 @@ default_scope = 'mmdet'
 # Register project-local modules (custom hooks, custom necks) with the
 # MMDet registry before Runner setup.
 custom_imports = dict(
-    imports=['hooks', 'necks'],
+    imports=['hooks', 'necks', 'losses'],
     allow_failed_imports=False,
 )
 

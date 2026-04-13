@@ -65,7 +65,7 @@ model = dict(
             target_stds=[0.1, 0.1, 0.2, 0.2],
         ),
         loss_cls=dict(
-            type='FocalLoss',
+            type='BF16SafeFocalLoss',
             use_sigmoid=True,
             gamma=2.0,
             alpha=0.25,
