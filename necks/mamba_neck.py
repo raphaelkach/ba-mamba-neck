@@ -148,30 +148,32 @@ class SS2D(nn.Module):
         return _run_scan(u.contiguous(), dt, A, B_raw, C_raw, self.Ds[k])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        Bsz, d, H, W = x.shape
-        L = H * W
+        input_dtype = x.dtype
+        with torch.amp.autocast('cuda', enabled=False):
+            x = x.float()
+            Bsz, d, H, W = x.shape
+            L = H * W
 
-        x_row = x.flatten(2)                               # row-major
-        x_col = x.transpose(2, 3).flatten(2)               # col-major
-        scans = [
-            x_row,
-            x_col,
-            x_row.flip(-1),
-            x_col.flip(-1),
-        ]
-        ys = [self._scan_direction(k, scans[k]) for k in range(self.K)]
+            x_row = x.flatten(2)
+            x_col = x.transpose(2, 3).flatten(2)
+            scans = [
+                x_row,
+                x_col,
+                x_row.flip(-1),
+                x_col.flip(-1),
+            ]
+            ys = [self._scan_direction(k, scans[k]) for k in range(self.K)]
 
-        # reverse the scan orders back into row-major (H, W)
-        y_row = ys[0]
-        y_col = ys[1]
-        y_row_r = ys[2].flip(-1)
-        y_col_r = ys[3].flip(-1)
+            y_row = ys[0]
+            y_col = ys[1]
+            y_row_r = ys[2].flip(-1)
+            y_col_r = ys[3].flip(-1)
 
-        def _col_to_row(t: torch.Tensor) -> torch.Tensor:
-            return (t.view(Bsz, d, W, H).transpose(2, 3).reshape(Bsz, d, L))
+            def _col_to_row(t: torch.Tensor) -> torch.Tensor:
+                return (t.view(Bsz, d, W, H).transpose(2, 3).reshape(Bsz, d, L))
 
-        y = y_row + _col_to_row(y_col) + y_row_r + _col_to_row(y_col_r)
-        return y.view(Bsz, d, H, W)
+            y = y_row + _col_to_row(y_col) + y_row_r + _col_to_row(y_col_r)
+            return y.view(Bsz, d, H, W).to(input_dtype)
 
 
 # VSSBlock - VMamba Fig. 2c
