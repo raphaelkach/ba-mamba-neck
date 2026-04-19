@@ -11,7 +11,7 @@ contract, and verifies that
        (max / min < 3x; otherwise a warning is printed).
 
 Runs on CUDA if available, otherwise CPU. Intended to be called from
-``notebooks/02_train.ipynb`` on Colab but safe to run locally for
+``notebooks/02_train_*.ipynb`` on Colab but safe to run locally for
 smoke-testing too.
 
 Usage:

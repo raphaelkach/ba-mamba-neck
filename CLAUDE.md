@@ -51,8 +51,12 @@ Output: Tuple[Tensor] - 5 feature maps {P3, P4, P5, P6, P7} for ATSSHead
 - Logging via mmengine.logging
 
 ## Notebook-Sync
-The files 02_train_fpn.ipynb, 02_train_aifi.ipynb and
-02_train_mamba.ipynb are identical copies of 02_train.ipynb.
-Only difference: cell 3 sets NECK to the respective value.
-RULE: Any change to one of the four files MUST be applied to
-all four files simultaneously. No exceptions.
+The three training notebooks (02_train_fpn.ipynb, 02_train_aifi.ipynb,
+02_train_mamba.ipynb) share the same structure. Between them, only
+the NECK variable in cell 3 and the install cell (mamba-ssm only in
+02_train_mamba.ipynb) may differ. Setup, imports, training loop, eval
+loop and convergence extraction are identical.
+RULE: Any change to one of the three training notebooks MUST be
+applied to all three simultaneously. No exceptions.
+01_data.ipynb, 03_eval.ipynb and 04_erf.ipynb are standalone and
+NOT part of the training-sync rule.

@@ -16,7 +16,9 @@ all three variants. The neck is the only independent variable
 | # | Notebook | Description | |
 |---|---|---|---|
 | 1 | `01_data.ipynb` | Data preparation (download, COCO conversion, SAHI slicing) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/raphaelkach/ba-mamba-neck/blob/main/notebooks/01_data.ipynb) |
-| 2 | `02_train.ipynb` | Training (run 3x: fpn, aifi, mamba) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/raphaelkach/ba-mamba-neck/blob/main/notebooks/02_train.ipynb) |
+| 2a | `02_train_fpn.ipynb` | Training V1 (CNN/FPN neck) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/raphaelkach/ba-mamba-neck/blob/main/notebooks/02_train_fpn.ipynb) |
+| 2b | `02_train_aifi.ipynb` | Training V2 (AIFI+CCFM Transformer neck) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/raphaelkach/ba-mamba-neck/blob/main/notebooks/02_train_aifi.ipynb) |
+| 2c | `02_train_mamba.ipynb` | Training V3 (MambaFPN neck) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/raphaelkach/ba-mamba-neck/blob/main/notebooks/02_train_mamba.ipynb) |
 | 3 | `03_eval.ipynb` | Evaluation and figures (metrics, statistics, scaling, qualitative) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/raphaelkach/ba-mamba-neck/blob/main/notebooks/03_eval.ipynb) |
 | 4 | `04_erf.ipynb` | Effective receptive field analysis (3 necks x 3 pyramid levels) | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/raphaelkach/ba-mamba-neck/blob/main/notebooks/04_erf.ipynb) |
 
@@ -42,8 +44,10 @@ all three variants. The neck is the only independent variable
 !python -m mmdet.utils.train configs/mamba.py --work-dir /content/drive/MyDrive/ba/mamba/seed_42
 ```
 
-See `notebooks/02_train.ipynb` for the full 10-seed loop with resume
-logic and version pinning.
+See `notebooks/02_train_fpn.ipynb`, `notebooks/02_train_aifi.ipynb` and
+`notebooks/02_train_mamba.ipynb` for the full 10-seed loop with resume
+logic and version pinning. Each notebook is designed to run in its own
+parallel Colab session.
 
 ## Repository structure
 

@@ -13,7 +13,7 @@ of the three configs and writes a markdown report containing:
     5. Computational profile: GFLOPs (fvcore), wall-clock latency
        (50 warmup + 100 timed iterations, cuda events), peak GPU memory.
 
-GPU-only script. Intended to be invoked from ``notebooks/02_train.ipynb``:
+GPU-only script. Intended to be invoked from a training notebook:
 
     !PYTHONPATH=. python scripts/generate_architecture_report.py
 """
