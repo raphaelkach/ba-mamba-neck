@@ -1,0 +1,634 @@
+{
+  "auto_scale_lr": {
+    "base_batch_size": 16,
+    "enable": false
+  },
+  "backend_args": null,
+  "custom_hooks": [
+    {
+      "priority": "LOW",
+      "type": "EpochTimerHook"
+    },
+    {
+      "ema_type": "ExpMomentumEMA",
+      "momentum": 0.0002,
+      "priority": "ABOVE_NORMAL",
+      "type": "EMAHook",
+      "update_buffers": true
+    }
+  ],
+  "custom_imports": {
+    "allow_failed_imports": false,
+    "imports": [
+      "hooks",
+      "necks",
+      "losses"
+    ]
+  },
+  "data_preprocessor": {
+    "bgr_to_rgb": true,
+    "mean": [
+      123.675,
+      116.28,
+      103.53
+    ],
+    "pad_size_divisor": 32,
+    "std": [
+      58.395,
+      57.12,
+      57.375
+    ],
+    "type": "DetDataPreprocessor"
+  },
+  "data_root": "/content/visdrone/",
+  "dataset_type": "CocoDataset",
+  "default_hooks": {
+    "checkpoint": {
+      "by_epoch": true,
+      "interval": 2,
+      "max_keep_ckpts": 3,
+      "rule": "greater",
+      "save_best": "coco/bbox_mAP",
+      "type": "CheckpointHook"
+    },
+    "logger": {
+      "interval": 50,
+      "type": "LoggerHook"
+    },
+    "param_scheduler": {
+      "type": "ParamSchedulerHook"
+    },
+    "sampler_seed": {
+      "type": "DistSamplerSeedHook"
+    },
+    "timer": {
+      "type": "IterTimerHook"
+    },
+    "visualization": {
+      "type": "DetVisualizationHook"
+    }
+  },
+  "default_scope": "mmdet",
+  "env_cfg": {
+    "cudnn_benchmark": true,
+    "dist_cfg": {
+      "backend": "nccl"
+    },
+    "mp_cfg": {
+      "mp_start_method": "fork",
+      "opencv_num_threads": 0
+    }
+  },
+  "image_scale": [
+    640,
+    640
+  ],
+  "load_from": null,
+  "log_level": "INFO",
+  "log_processor": {
+    "by_epoch": true,
+    "type": "LogProcessor",
+    "window_size": 50
+  },
+  "max_epochs": 24,
+  "metainfo": {
+    "classes": [
+      "pedestrian",
+      "people",
+      "bicycle",
+      "car",
+      "van",
+      "truck",
+      "tricycle",
+      "awning-tricycle",
+      "bus",
+      "motor"
+    ]
+  },
+  "model": {
+    "backbone": {
+      "depth": 50,
+      "frozen_stages": 4,
+      "init_cfg": {
+        "checkpoint": "torchvision://resnet50",
+        "type": "Pretrained"
+      },
+      "norm_cfg": {
+        "requires_grad": false,
+        "type": "BN"
+      },
+      "norm_eval": true,
+      "num_stages": 4,
+      "out_indices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "style": "pytorch",
+      "type": "ResNet"
+    },
+    "bbox_head": {
+      "anchor_generator": {
+        "octave_base_scale": 8,
+        "ratios": [
+          1.0
+        ],
+        "scales_per_octave": 1,
+        "strides": [
+          8,
+          16,
+          32,
+          64,
+          128
+        ],
+        "type": "AnchorGenerator"
+      },
+      "bbox_coder": {
+        "target_means": [
+          0.0,
+          0.0,
+          0.0,
+          0.0
+        ],
+        "target_stds": [
+          0.1,
+          0.1,
+          0.2,
+          0.2
+        ],
+        "type": "DeltaXYWHBBoxCoder"
+      },
+      "feat_channels": 256,
+      "in_channels": 256,
+      "loss_bbox": {
+        "loss_weight": 2.0,
+        "type": "GIoULoss"
+      },
+      "loss_centerness": {
+        "loss_weight": 1.0,
+        "type": "CrossEntropyLoss",
+        "use_sigmoid": true
+      },
+      "loss_cls": {
+        "alpha": 0.25,
+        "gamma": 2.0,
+        "loss_weight": 1.0,
+        "type": "BF16SafeFocalLoss",
+        "use_sigmoid": true
+      },
+      "num_classes": 10,
+      "stacked_convs": 4,
+      "type": "ATSSHead"
+    },
+    "data_preprocessor": {
+      "bgr_to_rgb": true,
+      "mean": [
+        123.675,
+        116.28,
+        103.53
+      ],
+      "pad_size_divisor": 32,
+      "std": [
+        58.395,
+        57.12,
+        57.375
+      ],
+      "type": "DetDataPreprocessor"
+    },
+    "neck": {
+      "in_channels": [
+        256,
+        512,
+        1024,
+        2048
+      ],
+      "num_outs": 5,
+      "out_channels": 256,
+      "type": "AifiNeck"
+    },
+    "test_cfg": {
+      "max_per_img": 100,
+      "min_bbox_size": 0,
+      "nms": {
+        "iou_threshold": 0.6,
+        "type": "nms"
+      },
+      "nms_pre": 1000,
+      "score_thr": 0.05
+    },
+    "train_cfg": {
+      "allowed_border": -1,
+      "assigner": {
+        "topk": 9,
+        "type": "ATSSAssigner"
+      },
+      "debug": false,
+      "pos_weight": -1
+    },
+    "type": "ATSS"
+  },
+  "optim_wrapper": {
+    "clip_grad": {
+      "max_norm": 0.1,
+      "norm_type": 2
+    },
+    "dtype": "bfloat16",
+    "optimizer": {
+      "lr": 0.0002,
+      "type": "AdamW",
+      "weight_decay": 0.05
+    },
+    "type": "AmpOptimWrapper"
+  },
+  "param_scheduler": [
+    {
+      "begin": 0,
+      "by_epoch": false,
+      "end": 500,
+      "start_factor": 0.001,
+      "type": "LinearLR"
+    },
+    {
+      "T_max": 24,
+      "begin": 0,
+      "by_epoch": true,
+      "convert_to_iter_based": true,
+      "end": 24,
+      "eta_min": 1e-06,
+      "type": "CosineAnnealingLR"
+    }
+  ],
+  "randomness": {
+    "deterministic": true,
+    "seed": null
+  },
+  "resume": true,
+  "test_cfg": {
+    "type": "TestLoop"
+  },
+  "test_dataloader": {
+    "batch_size": 1,
+    "dataset": {
+      "ann_file": "annotations/val_unsliced.json",
+      "backend_args": null,
+      "data_prefix": {
+        "img": "raw/VisDrone2019-DET-val/images/"
+      },
+      "data_root": "/content/visdrone/",
+      "metainfo": {
+        "classes": [
+          "pedestrian",
+          "people",
+          "bicycle",
+          "car",
+          "van",
+          "truck",
+          "tricycle",
+          "awning-tricycle",
+          "bus",
+          "motor"
+        ]
+      },
+      "pipeline": [
+        {
+          "backend_args": null,
+          "type": "LoadImageFromFile"
+        },
+        {
+          "keep_ratio": true,
+          "scale": [
+            640,
+            640
+          ],
+          "type": "Resize"
+        },
+        {
+          "type": "LoadAnnotations",
+          "with_bbox": true
+        },
+        {
+          "meta_keys": [
+            "img_id",
+            "img_path",
+            "ori_shape",
+            "img_shape",
+            "scale_factor"
+          ],
+          "type": "PackDetInputs"
+        }
+      ],
+      "test_mode": true,
+      "type": "CocoDataset"
+    },
+    "drop_last": false,
+    "num_workers": 2,
+    "persistent_workers": true,
+    "sampler": {
+      "shuffle": false,
+      "type": "DefaultSampler"
+    }
+  },
+  "test_evaluator": {
+    "ann_file": "/content/visdrone/annotations/val_unsliced.json",
+    "backend_args": null,
+    "format_only": false,
+    "metric": "bbox",
+    "type": "CocoMetric"
+  },
+  "test_pipeline": [
+    {
+      "backend_args": null,
+      "type": "LoadImageFromFile"
+    },
+    {
+      "keep_ratio": true,
+      "scale": [
+        640,
+        640
+      ],
+      "type": "Resize"
+    },
+    {
+      "type": "LoadAnnotations",
+      "with_bbox": true
+    },
+    {
+      "meta_keys": [
+        "img_id",
+        "img_path",
+        "ori_shape",
+        "img_shape",
+        "scale_factor"
+      ],
+      "type": "PackDetInputs"
+    }
+  ],
+  "train_cfg": {
+    "max_epochs": 24,
+    "type": "EpochBasedTrainLoop",
+    "val_interval": 2
+  },
+  "train_dataloader": {
+    "batch_sampler": {
+      "type": "AspectRatioBatchSampler"
+    },
+    "batch_size": 16,
+    "dataset": {
+      "ann_file": "annotations/train_sliced.json",
+      "backend_args": null,
+      "data_prefix": {
+        "img": "sliced/train_sliced_images/"
+      },
+      "data_root": "/content/visdrone/",
+      "filter_cfg": {
+        "filter_empty_gt": true,
+        "min_size": 4
+      },
+      "metainfo": {
+        "classes": [
+          "pedestrian",
+          "people",
+          "bicycle",
+          "car",
+          "van",
+          "truck",
+          "tricycle",
+          "awning-tricycle",
+          "bus",
+          "motor"
+        ]
+      },
+      "pipeline": [
+        {
+          "backend_args": null,
+          "type": "LoadImageFromFile"
+        },
+        {
+          "type": "LoadAnnotations",
+          "with_bbox": true
+        },
+        {
+          "keep_ratio": true,
+          "scales": [
+            [
+              480,
+              480
+            ],
+            [
+              512,
+              512
+            ],
+            [
+              544,
+              544
+            ],
+            [
+              576,
+              576
+            ],
+            [
+              608,
+              608
+            ],
+            [
+              640,
+              640
+            ],
+            [
+              672,
+              672
+            ],
+            [
+              704,
+              704
+            ],
+            [
+              736,
+              736
+            ],
+            [
+              768,
+              768
+            ],
+            [
+              800,
+              800
+            ]
+          ],
+          "type": "RandomChoiceResize"
+        },
+        {
+          "prob": 0.5,
+          "type": "RandomFlip"
+        },
+        {
+          "type": "PackDetInputs"
+        }
+      ],
+      "type": "CocoDataset"
+    },
+    "num_workers": 8,
+    "persistent_workers": true,
+    "pin_memory": true,
+    "prefetch_factor": 4,
+    "sampler": {
+      "shuffle": true,
+      "type": "DefaultSampler"
+    }
+  },
+  "train_pipeline": [
+    {
+      "backend_args": null,
+      "type": "LoadImageFromFile"
+    },
+    {
+      "type": "LoadAnnotations",
+      "with_bbox": true
+    },
+    {
+      "keep_ratio": true,
+      "scales": [
+        [
+          480,
+          480
+        ],
+        [
+          512,
+          512
+        ],
+        [
+          544,
+          544
+        ],
+        [
+          576,
+          576
+        ],
+        [
+          608,
+          608
+        ],
+        [
+          640,
+          640
+        ],
+        [
+          672,
+          672
+        ],
+        [
+          704,
+          704
+        ],
+        [
+          736,
+          736
+        ],
+        [
+          768,
+          768
+        ],
+        [
+          800,
+          800
+        ]
+      ],
+      "type": "RandomChoiceResize"
+    },
+    {
+      "prob": 0.5,
+      "type": "RandomFlip"
+    },
+    {
+      "type": "PackDetInputs"
+    }
+  ],
+  "val_cfg": {
+    "type": "ValLoop"
+  },
+  "val_dataloader": {
+    "batch_size": 1,
+    "dataset": {
+      "ann_file": "annotations/val_unsliced.json",
+      "backend_args": null,
+      "data_prefix": {
+        "img": "raw/VisDrone2019-DET-val/images/"
+      },
+      "data_root": "/content/visdrone/",
+      "metainfo": {
+        "classes": [
+          "pedestrian",
+          "people",
+          "bicycle",
+          "car",
+          "van",
+          "truck",
+          "tricycle",
+          "awning-tricycle",
+          "bus",
+          "motor"
+        ]
+      },
+      "pipeline": [
+        {
+          "backend_args": null,
+          "type": "LoadImageFromFile"
+        },
+        {
+          "keep_ratio": true,
+          "scale": [
+            640,
+            640
+          ],
+          "type": "Resize"
+        },
+        {
+          "type": "LoadAnnotations",
+          "with_bbox": true
+        },
+        {
+          "meta_keys": [
+            "img_id",
+            "img_path",
+            "ori_shape",
+            "img_shape",
+            "scale_factor"
+          ],
+          "type": "PackDetInputs"
+        }
+      ],
+      "test_mode": true,
+      "type": "CocoDataset"
+    },
+    "drop_last": false,
+    "num_workers": 2,
+    "persistent_workers": true,
+    "sampler": {
+      "shuffle": false,
+      "type": "DefaultSampler"
+    }
+  },
+  "val_evaluator": {
+    "ann_file": "/content/visdrone/annotations/val_unsliced.json",
+    "backend_args": null,
+    "format_only": false,
+    "metric": "bbox",
+    "type": "CocoMetric"
+  },
+  "vis_backends": [
+    {
+      "type": "LocalVisBackend"
+    }
+  ],
+  "visualizer": {
+    "name": "visualizer",
+    "type": "DetLocalVisualizer",
+    "vis_backends": [
+      {
+        "type": "LocalVisBackend"
+      }
+    ]
+  },
+  "work_dir": "./work_dirs/"
+}
