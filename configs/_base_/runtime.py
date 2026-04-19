@@ -66,5 +66,7 @@ visualizer = dict(
 
 # Misc
 load_from = None
-resume = False
+# MMEngine findet automatisch den letzten Checkpoint im work_dir.
+# Ohne Checkpoint startet Training normal von vorne.
+resume = True
 work_dir = './work_dirs/'
